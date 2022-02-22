@@ -18,6 +18,7 @@ Route::prefix('v1')->group(function (){
 
     Route::post('register',[\App\Http\Controllers\v1\AuthController::class,'register']);
     Route::post('login',[\App\Http\Controllers\v1\AuthController::class,'login']);
+    Route::get('coins',[\App\Http\Controllers\v1\APIController::class,'coins']);
 
     Route::middleware('auth:sanctum')->group(function (){
         Route::get('user',[\App\Http\Controllers\v1\AuthController::class,'user']);
