@@ -14,20 +14,20 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('v1')->group(function (){
+Route::prefix('v1')->group(function () {
 
-    Route::post('register',[\App\Http\Controllers\v1\AuthController::class,'register']);
-    Route::post('login',[\App\Http\Controllers\v1\AuthController::class,'login']);
-    Route::get('coins',[\App\Http\Controllers\v1\CoinController::class,'coins']);
+    Route::post('register', [\App\Http\Controllers\v1\AuthController::class, 'register']);
+    Route::post('login', [\App\Http\Controllers\v1\AuthController::class, 'login']);
+    Route::get('coins', [\App\Http\Controllers\v1\CoinController::class, 'coins']);
 
-    Route::middleware('auth:sanctum')->group(function (){
+    Route::middleware('auth:sanctum')->group(function () {
 
-        Route::group(['prefix'=>'user'],function (){
-            Route::get('/',[\App\Http\Controllers\v1\AuthController::class,'user']);
-            Route::get('coins',[\App\Http\Controllers\v1\UserController::class,'Coins']);
+        Route::group(['prefix' => 'user'], function () {
+            Route::get('/', [\App\Http\Controllers\v1\AuthController::class, 'user']);
+            Route::get('coins', [\App\Http\Controllers\v1\UserController::class, 'Coins']);
         });
 
-        Route::post('logout',[\App\Http\Controllers\v1\AuthController::class,'logout']);
+        Route::post('logout', [\App\Http\Controllers\v1\AuthController::class, 'logout']);
 
     });
 });

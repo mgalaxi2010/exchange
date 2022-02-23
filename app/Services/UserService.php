@@ -18,6 +18,7 @@ class UserService
 
         $this->userRepository = $userRepository;
     }
+
     public function getCoins($request)
     {
         return $this->userRepository->Coins($request);

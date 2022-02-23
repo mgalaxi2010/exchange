@@ -24,14 +24,14 @@ class UserController extends Controller
     public function coins(Request $request)
     {
         try {
-            $result =[
-                'status'=>Response::HTTP_OK,
-                'result'=>$this->userService->getCoins($request)
-            ];
-        }catch (\Exception $e){
             $result = [
-                'status'=> Response::HTTP_INTERNAL_SERVER_ERROR,
-                'error'=> $e->getMessage()
+                'status' => Response::HTTP_OK,
+                'result' => $this->userService->getCoins($request)
+            ];
+        } catch (\Exception $e) {
+            $result = [
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+                'error' => $e->getMessage()
             ];
         }
         return response()->json($result);

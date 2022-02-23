@@ -23,13 +23,13 @@ class CoinService
     public function saveCoin($data)
     {
 
-        $validator = Validator::make($data,[
+        $validator = Validator::make($data, [
             'name' => 'required',
             'symbol' => 'required',
             'price' => 'required'
         ]);
 
-        if($validator->fails()){
+        if ($validator->fails()) {
             throw new Exception($validator->errors()->first());
         }
         return $this->coinRepository->save($data);

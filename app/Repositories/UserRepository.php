@@ -20,11 +20,7 @@ class UserRepository
 
     public function coins($request)
     {
-        return $this->findBySlug($request['slug'])->with('coins')->get();
+        return $this->user->getUserCoins($request);
     }
 
-    public function findBySlug($slug)
-    {
-        return $this->user->findBySlug($slug);
-    }
 }

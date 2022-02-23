@@ -27,13 +27,13 @@ class CoinController extends Controller
         ]);
         try {
             $result = [
-                'status'=>Response::HTTP_OK,
+                'status' => Response::HTTP_OK,
                 $this->service->saveCoin($data)
             ];
         } catch (\Exception $e) {
             $result = [
-                'status'=> Response::HTTP_INTERNAL_SERVER_ERROR,
-                'error'=> $e->getMessage()
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+                'error' => $e->getMessage()
             ];
         }
         return response()->json($result);
@@ -42,14 +42,14 @@ class CoinController extends Controller
     public function coins(Request $request)
     {
         try {
-            $result =[
-                'status'=>Response::HTTP_OK,
-                'coins'=>$this->service->getCoins(),
-                ];
-        }catch (\Exception $e){
             $result = [
-                'status'=> Response::HTTP_INTERNAL_SERVER_ERROR,
-                'error'=> $e->getMessage()
+                'status' => Response::HTTP_OK,
+                'result' => $this->service->getCoins(),
+            ];
+        } catch (\Exception $e) {
+            $result = [
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+                'error' => $e->getMessage()
             ];
         }
         return response()->json($result);

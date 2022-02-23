@@ -13,7 +13,8 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens,Notifiable;
+    use HasApiTokens, Notifiable;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -39,19 +40,24 @@ class User extends Authenticatable
     {
 
         return self::create([
-            'email'=>$request['email'],
-            'password'=>Hash::make($request['password']),
-            'slug'=>Str::random(10)
+            'email' => $request['email'],
+            'password' => Hash::make($request['password']),
+            'slug' => Str::random(10)
         ]);
     }
 
     public function coins()
     {
-        return $this->belongsToMany(Coin::class,'users_coins','user_id','coin_id');
+        return $this->belongsToMany(Coin::class, 'users_coins', 'user_id', 'coin_id');
     }
 
     public static function findBySlug($slug)
     {
-        return self::where('slug',$slug)->first();
+        return self::where('slug', $slug)->first();
+    }
+
+    public function getUserCoins($request)
+    {
+        return self::findBySlug($request['slug'])->with('coins')->get();
     }
 }
