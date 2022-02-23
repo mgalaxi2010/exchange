@@ -2,9 +2,12 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\v1\CoinController;
 use App\Models\Coin;
+use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use PHPUnit\Util\Json;
 
@@ -49,11 +52,14 @@ class UpdateCoins extends Command
         $coins_response = json_decode($coins->getBody()->getContents(),true);
         $dollar_response = json_decode($dollar->getBody()->getContents(),true);
 
-        Coin::truncate();
-        Coin::insert(['name'=>'usdt','symbol'=>'usdt','price'=> $dollar_response['usdt']['value']]);
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        DB::table('coins')->truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        Coin::insert(['name'=>'usdt','symbol'=>'usdt','price'=> $dollar_response['usdt']['value'],'created_at'=>Carbon::now()]);
         foreach ($coins_response as $coin){
-            Coin::insert(['name'=>$coin['name'],'symbol'=>$coin['symbol'],'price'=> $coin['current_price']]);
+            Coin::insert(['name'=>$coin['name'],'symbol'=>$coin['symbol'],'price'=> $coin['current_price'],'created_at'=>Carbon::now()]);
         }
+
 
     }
 }

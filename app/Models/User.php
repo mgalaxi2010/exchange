@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use Hashids\Hashids;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 
 
@@ -18,6 +21,7 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'email',
+        'slug',
         'password',
     ];
 
@@ -28,14 +32,26 @@ class User extends Authenticatable
      */
     protected $hidden = [
         'password',
+        'id'
     ];
 
     public function createUser($request)
     {
+
         return self::create([
             'email'=>$request['email'],
-            'password'=>Hash::make($request['password'])
+            'password'=>Hash::make($request['password']),
+            'slug'=>Str::random(10)
         ]);
     }
 
+    public function coins()
+    {
+        return $this->belongsToMany(Coin::class,'users_coins','user_id','coin_id');
+    }
+
+    public static function findBySlug($slug)
+    {
+        return self::where('slug',$slug)->first();
+    }
 }

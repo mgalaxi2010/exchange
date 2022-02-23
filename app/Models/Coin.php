@@ -7,11 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 class Coin extends Model
 {
 
-    protected $guarded = ['id'];
+    protected $fillable = ['name','symbol','price'];
     public $timestamps = true;
 
     public function getALl()
     {
         return self::all();
     }
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class,'users_coins','coin_id','user_id');
+    }
+
 }
