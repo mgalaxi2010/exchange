@@ -34,7 +34,14 @@ class AuthController extends Controller
         if (!$this->isValid(["email" => $request['email']])) {
             return response(["message" => "email already registered"]);
         }
-        return (new User())->createUser($request);
+        $userObj = new User();
+        $user = $userObj->createUser($request);
+        if ($user) {
+            $userObj->createWallet($user);
+        } else {
+            throw new \Exception('error creating user! try again');
+        }
+        return $user;
     }
 
     public function login(Request $request)

@@ -17,7 +17,7 @@ class CreateCoinsTable extends Migration
             $table->increments('id')->unsigned();
             $table->string('name',20);
             $table->string('symbol',5);
-            $table->decimal('price',17,8);
+            $table->decimal('price',17,8)->nullable();
             $table->timestamps();
         });
     }

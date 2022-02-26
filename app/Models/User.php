@@ -2,14 +2,11 @@
 
 namespace App\Models;
 
-use Hashids\Hashids;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
-
 
 class User extends Authenticatable
 {
@@ -46,6 +43,12 @@ class User extends Authenticatable
         ]);
     }
 
+    public function createWallet($user)
+    {
+        $defaultCurrency = (new Coin())->getDefaultCurrency();
+        return $user->coins()->attach($defaultCurrency['id']);
+    }
+
     public function coins()
     {
         return $this->belongsToMany(Coin::class, 'users_coins', 'user_id', 'coin_id');
@@ -53,11 +56,29 @@ class User extends Authenticatable
 
     public static function findBySlug($slug)
     {
-        return self::where('slug', $slug)->first();
+        $user = self::where('slug', $slug)->first();
+        if ($user) {
+            return $user;
+        } else {
+            throw new \Exception("User Not Found!");
+        }
     }
 
     public function getUserCoins($request)
     {
         return self::findBySlug($request['slug'])->with('coins')->get();
+    }
+
+    public static function getUserBalance($user)
+    {
+        return $user->coins()->where('coins.name', 'Rial')->select('amount as amount', 'coin_id as coin_id')->first();
+    }
+
+    public function depositWallet($request)
+    {
+        $user = self::findBySlug($request['slug']);
+        $old_rial_balance = self::getUserBalance($user);
+        $user->coins()->wherePivot('coin_id', $old_rial_balance['coin_id'])->updateExistingPivot($old_rial_balance['coin_id'], ['users_coins.amount' => $old_rial_balance['amount'] + intval($request['amount'])], false);
+        return "wallet updated successfully";
     }
 }

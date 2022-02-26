@@ -3,30 +3,30 @@
 namespace App\Http\Controllers\v1;
 
 use App\Http\Controllers\Controller;
-use App\Services\UserService;
+use App\Services\WalletService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
-class UserController extends Controller
+class WalletController extends Controller
 {
+
     /**
-     * @var UserService
+     * @var WalletService
      */
-    protected $userService;
+    protected $walletService;
 
-    public function __construct(UserService $userService)
+    public function __construct(WalletService $walletService)
     {
-
-        $this->userService = $userService;
+        $this->walletService = $walletService;
     }
 
-
-    public function coins(Request $request)
+    public function deposit(Request $request)
     {
         try {
             $result = [
                 'status' => Response::HTTP_OK,
-                'result' => $this->userService->getCoins($request)
+                'result' => $this->walletService->deposit($request)
             ];
         } catch (\Exception $e) {
             $result = [
@@ -37,8 +37,4 @@ class UserController extends Controller
         return response()->json($result);
     }
 
-    public function test()
-    {
-
-    }
 }

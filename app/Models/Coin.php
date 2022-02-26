@@ -20,4 +20,8 @@ class Coin extends Model
         return $this->belongsToMany(User::class, 'users_coins', 'coin_id', 'user_id');
     }
 
+    public function getDefaultCurrency()
+    {
+        return self::where('name', 'Rial')->first();
+    }
 }

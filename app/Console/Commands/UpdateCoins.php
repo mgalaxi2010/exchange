@@ -2,14 +2,11 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Controllers\v1\CoinController;
 use App\Models\Coin;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use PHPUnit\Util\Json;
 
 class UpdateCoins extends Command
 {
@@ -45,19 +42,21 @@ class UpdateCoins extends Command
     public function handle()
     {
         $httpClient = new Client();
-        $coin_api = config('api.coinGecko.market').'?'.config('api.coinGecko.coins');
-        $dollar_api = config('api.navasan.usdt').'&api_key='.config('api.navasan.api_key');
+        $coin_api = config('api.coinGecko.market') . '?' . config('api.coinGecko.coins');
+        $dollar_api = config('api.navasan.usdt') . '&api_key=' . config('api.navasan.api_key');
         $coins = $httpClient->get($coin_api);
         $dollar = $httpClient->get($dollar_api);
-        $coins_response = json_decode($coins->getBody()->getContents(),true);
-        $dollar_response = json_decode($dollar->getBody()->getContents(),true);
+        $coins_response = json_decode($coins->getBody()->getContents(), true);
+        $dollar_response = json_decode($dollar->getBody()->getContents(), true);
 
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         DB::table('coins')->truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-        Coin::insert(['name'=>'usdt','symbol'=>'usdt','price'=> $dollar_response['usdt']['value'],'created_at'=>Carbon::now()]);
-        foreach ($coins_response as $coin){
-            Coin::insert(['name'=>$coin['name'],'symbol'=>$coin['symbol'],'price'=> $coin['current_price'],'created_at'=>Carbon::now()]);
+
+        Coin::insert(['name' => 'Usdt', 'symbol' => 'USDT', 'price' => 1, 'created_at' => Carbon::now()]);
+        Coin::insert(['name' => 'Rial', 'symbol' => 'IRR', 'price' => 1 / ($dollar_response['usdt']['value'] * 10), 'created_at' => Carbon::now()]);
+        foreach ($coins_response as $coin) {
+            Coin::insert(['name' => $coin['name'], 'symbol' => strtoupper($coin['symbol']), 'price' => $coin['current_price'], 'created_at' => Carbon::now()]);
         }
 
 

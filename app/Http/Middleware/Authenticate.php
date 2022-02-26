@@ -4,11 +4,22 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Auth\Middleware\Authenticate as Middleware;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 
 class Authenticate extends Middleware
 {
+    public function handle($request, Closure $next, ...$guards)
+    {
+        if ($jwt = $request->cookie('jwt')) {
+            $request->headers->set('Authorization', 'Bearer ' . $jwt);
+        } else {
+            return response(['message' => 'you are logged out! please login first']);
+        }
+
+        $this->authenticate($request, $guards);
+
+        return $next($request);
+    }
+
     /**
      * Get the path the user should be redirected to when they are not authenticated.
      *
@@ -20,19 +31,5 @@ class Authenticate extends Middleware
 //        if (! $request->expectsJson()) {
 //
 //        }
-    }
-
-    public function handle($request, Closure $next, ...$guards)
-    {
-
-        if ($jwt = $request->cookie('jwt')) {
-            $request->headers->set('Authorization', 'Bearer ' . $jwt);
-        } else {
-            return response(['message' => 'you are logged out! please login first']);
-        }
-
-        $this->authenticate($request, $guards);
-
-        return $next($request);
     }
 }

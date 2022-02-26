@@ -13,9 +13,11 @@ class CreateTransactionTable extends Migration
      */
     public function up()
     {
-//        Schema::table('transactions', function (Blueprint $table) {
-//            //
-//        });
+        Schema::create('transactions', function (Blueprint $table) {
+            $table->increments('id');
+
+            $table->timestamps();
+        });
     }
 
     /**
@@ -25,8 +27,6 @@ class CreateTransactionTable extends Migration
      */
     public function down()
     {
-//        Schema::table('transactions', function (Blueprint $table) {
-//            //
-//        });
+        Schema::dropIfExists('transactions');
     }
 }
