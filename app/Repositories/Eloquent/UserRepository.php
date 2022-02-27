@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Eloquent;
 
+use App\Http\Resources\WalletApiResource;
 use App\Models\User;
 use App\Repositories\UserRepositoryInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,7 +27,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         try {
             $result = [
                 'status' => Response::HTTP_OK,
-                'coins' => $this->model->getUserCoins()
+                'coins' => WalletApiResource::collection($this->model->getUserCoins())
             ];
         } catch (\Exception $e) {
             $result = [

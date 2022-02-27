@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Http\Resources\CoinApiResource;
 use Illuminate\Database\Eloquent\Model;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -16,7 +17,7 @@ class Coin extends Model
         try {
             $result = [
                 'status' => Response::HTTP_OK,
-                'coins' => self::all()
+                'coins' => CoinApiResource::collection(self::all())
             ];
         } catch (\Exception $e) {
             $result = [
