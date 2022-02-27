@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
@@ -35,23 +37,20 @@ class User extends Authenticatable
 
     public function createUser($request)
     {
-
-        return self::create([
-            'email' => $request['email'],
-            'password' => Hash::make($request['password']),
-            'slug' => Str::random(10)
-        ]);
-    }
-
-    public function createWallet($user)
-    {
-        $defaultCurrency = (new Coin())->getDefaultCurrency();
-        return $user->coins()->attach($defaultCurrency['id']);
+        try {
+            return self::create([
+                'email' => $request['email'],
+                'password' => Hash::make($request['password']),
+                'slug' => Str::random(10)
+            ]);
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage());
+        }
     }
 
     public function coins()
     {
-        return $this->belongsToMany(Coin::class, 'users_coins', 'user_id', 'coin_id');
+        return $this->belongsToMany(Coin::class, 'users_coins')->withPivot('amount');
     }
 
     public static function findBySlug($slug)
@@ -64,9 +63,9 @@ class User extends Authenticatable
         }
     }
 
-    public function getUserCoins($request)
+    public function getUserCoins()
     {
-        return self::findBySlug($request['slug'])->with('coins')->get();
+        return Auth::user()->coins()->get();
     }
 
     public static function getUserBalance($user)
@@ -78,7 +77,12 @@ class User extends Authenticatable
     {
         $user = self::findBySlug($request['slug']);
         $old_rial_balance = self::getUserBalance($user);
-        $user->coins()->wherePivot('coin_id', $old_rial_balance['coin_id'])->updateExistingPivot($old_rial_balance['coin_id'], ['users_coins.amount' => $old_rial_balance['amount'] + intval($request['amount'])], false);
+        if ($old_rial_balance) {
+            $user->coins()->wherePivot('coin_id', $old_rial_balance['coin_id'])->updateExistingPivot($old_rial_balance['coin_id'], ['users_coins.amount' => $old_rial_balance['amount'] + intval($request['amount'])], false);
+        } else {
+            $default_currency = (new Coin())->getDefaultCurrency();
+            $user->coins()->attach([$default_currency['id'] => ["amount" => $request['amount']]]);
+        }
         return "wallet updated successfully";
     }
 }

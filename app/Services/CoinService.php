@@ -2,7 +2,8 @@
 
 namespace App\Services;
 
-use App\Repositories\CoinRepository;
+use App\Repositories\CoinRepositoryInterface;
+use App\Repositories\Eloquent\CoinRepository;
 use Illuminate\Support\Facades\Validator;
 use mysql_xdevapi\Exception;
 
@@ -12,28 +13,15 @@ class CoinService
     /**
      * @var CoinRepository
      */
-    protected $coinRepository;
+    private $coinRepository;
 
-    public function __construct(CoinRepository $coinRepository)
+    public function __construct(CoinRepositoryInterface $coinRepository)
     {
 
         $this->coinRepository = $coinRepository;
     }
 
-    public function saveCoin($data)
-    {
 
-        $validator = Validator::make($data, [
-            'name' => 'required',
-            'symbol' => 'required',
-            'price' => 'required'
-        ]);
-
-        if ($validator->fails()) {
-            throw new Exception($validator->errors()->first());
-        }
-        return $this->coinRepository->save($data);
-    }
 
     public function getCoins()
     {

@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-class AuthRepository
+interface CoinRepositoryInterface
 {
 
 }

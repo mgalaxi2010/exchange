@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-class TransactionRepository
+interface CoinConvertRepositoryInterface
 {
 
 }

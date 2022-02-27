@@ -4,9 +4,11 @@ namespace App\Http\Controllers\v1;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\AuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
 use function response;
@@ -14,47 +16,36 @@ use function response;
 class AuthController extends Controller
 {
 
-    public static $rules = [
-        'email' => 'required|unique:users,email'
-    ];
+    protected $service;
 
-    public static function isValid($data)
+    public function __construct(AuthService $authService)
     {
-        $validation = Validator::make($data, static::$rules);
-
-        if ($validation->passes()) {
-            return true;
-        }
-
-        return false;
+        $this->service = $authService;
     }
 
     public function register(Request $request)
     {
-        if (!$this->isValid(["email" => $request['email']])) {
-            return response(["message" => "email already registered"]);
-        }
-        $userObj = new User();
-        $user = $userObj->createUser($request);
-        if ($user) {
-            $userObj->createWallet($user);
+        $validate = $this->service->validateUserRequest($request);
+        if ($validate) {
+            $this->service->createUser($request);
+            $message = "user registered successfully";
         } else {
-            throw new \Exception('error creating user! try again');
+            $message = "email already registered";
         }
-        return $user;
+        return response(["message" => $message]);
     }
 
     public function login(Request $request)
     {
-        if (!Auth::attempt($request->only('email', 'password'))) {
+        $authenticated = $this->service->AuthenticateUser($request);
+        if (!$authenticated) {
             return response([
                 'message' => "Invalid email or password"
             ], Response::HTTP_UNAUTHORIZED);
         }
 
-        $user = Auth::user();
-        $token = $user->createToken('token')->plainTextToken;
-        $cookie = cookie('jwt', $token, 60 * 24); //1 day
+        $user = $this->service->getUser();
+        $cookie = $this->service->setCookie($user);
 
         return response([
             'message' => 'successful login'
@@ -63,12 +54,12 @@ class AuthController extends Controller
 
     public function user()
     {
-        return Auth::user();
+        return $this->service->getUser();
     }
 
     public function logout()
     {
-        $cookie = cookie::forget('jwt');
+        $cookie = $this->service->destroyCookie();
         return response([
             'message' => 'successful logout'
         ])->withCookie($cookie);

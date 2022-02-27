@@ -4,8 +4,7 @@ namespace App\Http\Controllers\v1;
 
 use App\Http\Controllers\Controller;
 use App\Services\UserService;
-use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
+
 
 class UserController extends Controller
 {
@@ -16,29 +15,14 @@ class UserController extends Controller
 
     public function __construct(UserService $userService)
     {
-
         $this->userService = $userService;
     }
 
 
-    public function coins(Request $request)
+    public function coins()
     {
-        try {
-            $result = [
-                'status' => Response::HTTP_OK,
-                'result' => $this->userService->getCoins($request)
-            ];
-        } catch (\Exception $e) {
-            $result = [
-                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
-                'error' => $e->getMessage()
-            ];
-        }
+        $result = $this->userService->coins();
         return response()->json($result);
     }
 
-    public function test()
-    {
-
-    }
 }

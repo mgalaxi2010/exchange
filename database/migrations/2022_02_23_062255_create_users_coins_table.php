@@ -15,7 +15,7 @@ class CreateUsersCoinsTable extends Migration
     {
         Schema::create('users_coins', function (Blueprint $table) {
             $table->bigInteger('user_id')->unsigned();
-            $table->integer('coin_id')->unsigned()->unique();
+            $table->integer('coin_id')->unsigned();
             $table->decimal('amount',17,8)->default(0);
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('coin_id')->references('id')->on('coins')->onDelete('cascade');

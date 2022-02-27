@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Symfony\Component\HttpFoundation\Response;
 
 class Coin extends Model
 {
@@ -12,7 +13,18 @@ class Coin extends Model
 
     public function getALl()
     {
-        return self::all();
+        try {
+            $result = [
+                'status' => Response::HTTP_OK,
+                'coins' => self::all()
+            ];
+        } catch (\Exception $e) {
+            $result = [
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+                'error' => $e->getMessage()
+            ];
+        }
+        return $result;
     }
 
     public function users()
@@ -23,5 +35,10 @@ class Coin extends Model
     public function getDefaultCurrency()
     {
         return self::where('name', 'Rial')->first();
+    }
+
+    public function getPriceAttribute($value)
+    {
+        return $value . " USDT";
     }
 }

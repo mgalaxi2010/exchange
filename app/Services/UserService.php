@@ -2,7 +2,8 @@
 
 namespace App\Services;
 
-use App\Repositories\UserRepository;
+use App\Repositories\Eloquent\UserRepository;
+use App\Repositories\UserRepositoryInterface;
 
 class UserService
 {
@@ -11,17 +12,18 @@ class UserService
     /**
      * @var UserRepository
      */
-    protected $userRepository;
+    private $userRepository;
 
-    public function __construct(UserRepository $userRepository)
+    public function __construct(UserRepositoryInterface $userRepository)
     {
 
         $this->userRepository = $userRepository;
     }
 
-    public function getCoins($request)
+    public function coins()
     {
-        return $this->userRepository->Coins($request);
+        return $this->userRepository->coins();
     }
+
 
 }

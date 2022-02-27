@@ -2,20 +2,22 @@
 
 namespace App\Services;
 
-use App\Repositories\WalletRepository;
+
+use App\Repositories\Eloquent\WalletRepository;
+use App\Repositories\WalletRepositoryInterface;
 
 class WalletService
 {
     /**
      * @var WalletRepository
      */
-    protected $walletRepository;
+    private $walletRepository;
 
     /**
      * @var WalletService
      */
 
-    public function __construct(WalletRepository $walletRepository)
+    public function __construct(WalletRepositoryInterface $walletRepository)
     {
 
         $this->walletRepository = $walletRepository;
