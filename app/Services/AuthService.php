@@ -3,51 +3,31 @@
 namespace App\Services;
 
 use App\Repositories\AuthRepositoryInterface;
-use App\Repositories\Eloquent\AuthRepository;
 
 
 class AuthService
 {
 
-    /**
-     * @var AuthRepository
-     */
     protected $authRepository;
 
     public function __construct(AuthRepositoryInterface $authRepository)
     {
-
         $this->authRepository = $authRepository;
     }
 
-    public function validateUserRequest($request): bool
+    public function AuthenticateUser($data): bool
     {
-       return $this->authRepository->validateUserRequest($request);
+        return $this->authRepository->AuthenticateUser($data);
     }
 
-    /**
-     * @throws \Exception
-     */
-    public function createUser($request)
+    public function deleteToken()
     {
-        return $this->authRepository->createUser($request);
+        return $this->authRepository->deleteToken();
     }
 
-    public function AuthenticateUser($request): bool
+    public function generateToken()
     {
-        return $this->authRepository->AuthenticateUser($request);
-    }
-    public function destroyCookie()
-    {
-        return $this->authRepository->destroyCookie();
+        return $this->authRepository->generateToken();
     }
 
-    public function setCookie($user)
-    {
-        return $this->authRepository->setCookie($user);
-    }
-    public function getUser()
-    {
-        return $this->authRepository->getUser();
-    }
 }

@@ -2,8 +2,10 @@
 
 namespace App\Repositories\Eloquent;
 
+use App\Http\Resources\CoinApiResource;
 use App\Models\Coin;
 use App\Repositories\CoinRepositoryInterface;
+use Symfony\Component\HttpFoundation\Response;
 
 class CoinRepository extends BaseRepository implements CoinRepositoryInterface
 {
@@ -15,12 +17,17 @@ class CoinRepository extends BaseRepository implements CoinRepositoryInterface
 
     public function __Construct(Coin $coin)
     {
-        $this->coin = $coin;
+        parent::__construct($coin);
     }
 
 
     public function coins()
     {
-        return $this->coin->getALl();
+        return CoinApiResource::collection($this->model->all());
+    }
+
+    public function defaultCurrency()
+    {
+        return $this->model->defaultCurrency();
     }
 }

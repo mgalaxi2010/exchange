@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
-
+use App\Repositories\Eloquent\CoinRepository;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 use Laravel\Sanctum\HasApiTokens;
+
 
 class User extends Authenticatable
 {
@@ -21,7 +21,6 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'email',
-        'slug',
         'password',
     ];
 
@@ -31,57 +30,43 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $hidden = [
-        'password',
-        'id'
+        'password'
     ];
 
-    public function createUser($request)
+    public function setPasswordAttribute($value)
     {
-        try {
-            return self::create([
-                'email' => $request['email'],
-                'password' => Hash::make($request['password']),
-                'slug' => Str::random(10)
-            ]);
-        } catch (\Exception $e) {
-            throw new \Exception($e->getMessage());
-        }
+        $this->attributes['password'] = bcrypt($value);
     }
 
     public function coins()
     {
-        return $this->belongsToMany(Coin::class, 'users_coins')->withPivot('amount');
+        return $this->belongsToMany(Coin::class, 'users_coins', 'user_id', 'coin_id')->withPivot('amount');
     }
 
-    public static function findBySlug($slug)
+    public function transactions()
     {
-        $user = self::where('slug', $slug)->first();
-        if ($user) {
-            return $user;
-        } else {
-            throw new \Exception("User Not Found!");
-        }
+        return $this->hasMany(Transaction::class);
     }
-
-    public function getUserCoins()
+    public function userWallet()
     {
         return Auth::user()->coins()->get();
     }
 
-    public static function getUserBalance($user)
+    public static function userBalance()
     {
-        return $user->coins()->where('coins.name', 'Rial')->select('amount as amount', 'coin_id as coin_id')->first();
+        return Auth::user()->coins()->where('coins.name', 'Rial')->first();
     }
 
-    public function depositWallet($request)
+    public function deposit($amount)
     {
-        $user = self::findBySlug($request['slug']);
-        $old_rial_balance = self::getUserBalance($user);
-        if ($old_rial_balance) {
-            $user->coins()->wherePivot('coin_id', $old_rial_balance['coin_id'])->updateExistingPivot($old_rial_balance['coin_id'], ['users_coins.amount' => $old_rial_balance['amount'] + intval($request['amount'])], false);
+        $user = Auth::user();
+        $oldBalance = self::userBalance();
+
+        if ($oldBalance) {
+            $user->coins()->wherePivot('coin_id', $oldBalance['pivot']['coin_id'])->updateExistingPivot($oldBalance['pivot']['coin_id'], ['users_coins.amount' => intval($oldBalance['pivot']['amount']) + $amount], false);
         } else {
-            $default_currency = (new Coin())->getDefaultCurrency();
-            $user->coins()->attach([$default_currency['id'] => ["amount" => $request['amount']]]);
+            $defaultCurrency = (new CoinRepository(new Coin()))->defaultCurrency();
+            $user->coins()->attach([$defaultCurrency['id'] => compact("amount")]);
         }
         return "wallet updated successfully";
     }

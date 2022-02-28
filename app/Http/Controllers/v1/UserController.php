@@ -4,6 +4,7 @@ namespace App\Http\Controllers\v1;
 
 use App\Http\Controllers\Controller;
 use App\Services\UserService;
+use Symfony\Component\HttpFoundation\Response;
 
 
 class UserController extends Controller
@@ -18,10 +19,12 @@ class UserController extends Controller
         $this->userService = $userService;
     }
 
-
     public function coins()
     {
-        $result = $this->userService->coins();
+        $result = [
+            'status' => Response::HTTP_OK,
+            'coins' => $this->userService->coins()
+        ];
         return response()->json($result);
     }
 

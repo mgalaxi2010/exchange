@@ -19,4 +19,9 @@ class TransactionService
 
         $this->transactionRepository = $transactionRepository;
     }
+
+    public function userTransaction()
+    {
+        return $this->transactionRepository->userTransactions();
+    }
 }

@@ -4,8 +4,6 @@ namespace App\Services;
 
 use App\Repositories\CoinRepositoryInterface;
 use App\Repositories\Eloquent\CoinRepository;
-use Illuminate\Support\Facades\Validator;
-use mysql_xdevapi\Exception;
 
 class CoinService
 {
@@ -17,15 +15,13 @@ class CoinService
 
     public function __construct(CoinRepositoryInterface $coinRepository)
     {
-
         $this->coinRepository = $coinRepository;
     }
 
 
-
-    public function getCoins()
+    public function coins()
     {
-        return $this->coinRepository->Coins();
+        return $this->coinRepository->coins();
     }
 
 }

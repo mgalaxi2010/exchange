@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\v1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UserRequest;
 use App\Models\User;
 use App\Services\AuthService;
+use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
@@ -16,52 +18,48 @@ use function response;
 class AuthController extends Controller
 {
 
-    protected $service;
+    protected $authService;
+    private $userService;
 
-    public function __construct(AuthService $authService)
+    public function __construct(AuthService $authService, UserService $userService)
     {
-        $this->service = $authService;
+        $this->authService = $authService;
+        $this->userService = $userService;
     }
 
-    public function register(Request $request)
+    /**
+     * @throws \Exception
+     */
+    public function register(UserRequest $request)
     {
-        $validate = $this->service->validateUserRequest($request);
-        if ($validate) {
-            $this->service->createUser($request);
-            $message = "user registered successfully";
-        } else {
-            $message = "email already registered";
-        }
-        return response(["message" => $message]);
+        $data = ['email' => $request['email'], 'password' => $request['password']];
+        $this->userService->create($data);
+        return response(["message" => "user registered successfully"]);
     }
 
     public function login(Request $request)
     {
-        $authenticated = $this->service->AuthenticateUser($request);
+        $data = ['email'=>$request['email'],'password'=>$request['password']];
+        $authenticated = $this->authService->AuthenticateUser($data);
         if (!$authenticated) {
             return response([
                 'message' => "Invalid email or password"
             ], Response::HTTP_UNAUTHORIZED);
         }
 
-        $user = $this->service->getUser();
-        $cookie = $this->service->setCookie($user);
-
+        $token = $this->authService->generateToken();
         return response([
-            'message' => 'successful login'
-        ])->withCookie($cookie);
-    }
-
-    public function user()
-    {
-        return $this->service->getUser();
+            'message' => 'successful login',
+            'access_token' => $token
+        ], Response::HTTP_OK);
     }
 
     public function logout()
     {
-        $cookie = $this->service->destroyCookie();
+        $this->authService->deleteToken();
         return response([
-            'message' => 'successful logout'
-        ])->withCookie($cookie);
+            'message' => 'successful logout',
+            'access_token' => ''
+        ]);
     }
 }

@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use App\Http\Resources\CoinApiResource;
 use Illuminate\Database\Eloquent\Model;
-use Symfony\Component\HttpFoundation\Response;
 
 class Coin extends Model
 {
@@ -12,31 +10,16 @@ class Coin extends Model
     protected $fillable = ['name', 'symbol', 'price'];
     public $timestamps = true;
 
-    public function getALl()
-    {
-        try {
-            $result = [
-                'status' => Response::HTTP_OK,
-                'coins' => CoinApiResource::collection(self::all())
-            ];
-        } catch (\Exception $e) {
-            $result = [
-                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
-                'error' => $e->getMessage()
-            ];
-        }
-        return $result;
-    }
-
     public function users()
     {
         return $this->belongsToMany(User::class, 'users_coins', 'coin_id', 'user_id');
     }
 
-    public function getDefaultCurrency()
+    public function defaultCurrency()
     {
         return self::where('name', 'Rial')->first();
     }
+
 
     public function getPriceAttribute($value)
     {

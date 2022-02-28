@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Repositories\AuthRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class AuthRepository extends BaseRepository implements AuthRepositoryInterface
@@ -18,49 +19,21 @@ class AuthRepository extends BaseRepository implements AuthRepositoryInterface
 
     public function __construct(User $user)
     {
-
-        $this->user = $user;
+        parent::__Construct($user);
     }
 
-    public function validateUserRequest($request): bool
+    public function AuthenticateUser(array $data): bool
     {
-        $validate = false;
-        $validation = Validator::make(["email" => $request['email']], [
-            'email' => 'required|unique:users,email'
-        ]);
-
-        if ($validation->passes()) {
-            $validate = true;
-        }
-        return $validate;
+        return Auth::attempt(['email'=>$data['email'],'password'=>$data['password']]);
     }
 
-    /**
-     * @throws \Exception
-     */
-    public function createUser($request)
+    public function generateToken()
     {
-        return $this->user->createUser($request);
+        return Auth::user()->createToken('token')->plainTextToken;
     }
 
-    public function getUser()
+    public function deleteToken()
     {
-        return Auth::user();
-    }
-
-    public function AuthenticateUser($request): bool
-    {
-        return Auth::attempt($request->only('email', 'password'));
-    }
-
-    public function setCookie($user)
-    {
-        $token = $user->createToken('token')->plainTextToken;
-        return cookie('jwt', $token, 60 * 24); //1 day
-    }
-
-    public function destroyCookie()
-    {
-        return cookie::forget('jwt');
+        return Auth::user()->tokens()->delete();
     }
 }

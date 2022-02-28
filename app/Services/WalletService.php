@@ -19,7 +19,6 @@ class WalletService
 
     public function __construct(WalletRepositoryInterface $walletRepository)
     {
-
         $this->walletRepository = $walletRepository;
     }
 

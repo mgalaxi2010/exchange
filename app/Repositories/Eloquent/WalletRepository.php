@@ -12,12 +12,12 @@ class WalletRepository extends BaseRepository implements WalletRepositoryInterfa
 
     public function __construct(User $model)
     {
-        $this->model = $model;
+        parent::__construct($model);
     }
 
     public function deposit($request)
     {
-        return $this->model->depositWallet($request);
+        return $this->model->deposit($request);
     }
 
 }

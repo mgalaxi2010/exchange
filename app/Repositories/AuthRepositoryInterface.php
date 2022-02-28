@@ -4,13 +4,9 @@ namespace App\Repositories;
 
 interface AuthRepositoryInterface
 {
-    public function getUser();
+    public function AuthenticateUser(array $data);
 
-    public function destroyCookie();
+    public function generateToken();
 
-    public function setCookie($user);
-
-    public function AuthenticateUser($request);
-
-    public function createUser($request);
+    public function deleteToken();
 }

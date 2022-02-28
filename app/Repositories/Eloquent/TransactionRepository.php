@@ -2,8 +2,11 @@
 
 namespace App\Repositories\Eloquent;
 
+use App\Http\Resources\TransactionApiResource;
 use App\Models\Transaction;
 use App\Repositories\TransactionRepositoryInterface;
+use Illuminate\Support\Facades\Auth;
+
 
 class TransactionRepository extends BaseRepository implements TransactionRepositoryInterface
 {
@@ -11,6 +14,11 @@ class TransactionRepository extends BaseRepository implements TransactionReposit
 
     public function __construct(Transaction $model)
     {
-        $this->model = $model;
+        parent::__construct($model);
+    }
+
+    public function userTransactions()
+    {
+        return TransactionApiResource::collection(Auth::user()->transactions());
     }
 }

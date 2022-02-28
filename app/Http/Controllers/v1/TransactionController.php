@@ -19,4 +19,9 @@ class TransactionController extends Controller
 
         $this->transactionService = $transactionService;
     }
+
+    public function transactions()
+    {
+        return $this->transactionService->userTransaction();
+    }
 }
