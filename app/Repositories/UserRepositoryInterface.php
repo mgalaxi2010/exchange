@@ -8,5 +8,5 @@ interface UserRepositoryInterface
 
     public function userWallet();
 
-    public function userBalance();
+    public function userCoinBalance(string $coin);
 }

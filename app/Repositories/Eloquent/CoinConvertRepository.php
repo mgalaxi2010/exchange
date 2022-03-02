@@ -4,8 +4,10 @@ namespace App\Repositories\Eloquent;
 
 use App\Models\Coin;
 
+use App\Models\User;
 use App\Repositories\CoinConvertRepositoryInterface;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 
 /**
@@ -19,8 +21,14 @@ class CoinConvertRepository extends BaseRepository implements CoinConvertReposit
         parent::__construct($model);
     }
 
-    public function convertCoin(Request $request)
-    {
 
+    public function getUserCoinBalance(string $coin)
+    {
+        return (new UserRepository(new User()))->userCoinBalance($coin);
+    }
+
+    public function getCoinBySymbol(string $coin)
+    {
+        return $this->model->getCoinBySymbol($coin);
     }
 }

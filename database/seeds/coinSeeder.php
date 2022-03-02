@@ -17,5 +17,6 @@ class coinSeeder extends Seeder
            'symbol'=>'IRR',
            'price'=> '.0000038',
         ]);
+
     }
 }

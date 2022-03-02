@@ -15,14 +15,8 @@ class Coin extends Model
         return $this->belongsToMany(User::class, 'users_coins', 'coin_id', 'user_id');
     }
 
-    public function defaultCurrency()
+    public function getCoinBySymbol($coin)
     {
-        return self::where('name', 'Rial')->first();
-    }
-
-
-    public function getPriceAttribute($value)
-    {
-        return $value . " USDT";
+        return self::where('symbol',strtoupper($coin))->first();
     }
 }

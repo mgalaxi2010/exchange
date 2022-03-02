@@ -53,8 +53,8 @@ class UpdateCoins extends Command
         DB::table('coins')->truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        Coin::insert(['name' => 'Usdt', 'symbol' => 'USDT', 'price' => 1, 'created_at' => Carbon::now()]);
         Coin::insert(['name' => 'Rial', 'symbol' => 'IRR', 'price' => 1 / ($dollar_response['usdt']['value'] * 10), 'created_at' => Carbon::now()]);
+        Coin::insert(['name' => 'Usdt', 'symbol' => 'USDT', 'price' => 1, 'created_at' => Carbon::now()]);
         foreach ($coins_response as $coin) {
             Coin::insert(['name' => $coin['name'], 'symbol' => strtoupper($coin['symbol']), 'price' => $coin['current_price'], 'created_at' => Carbon::now()]);
         }

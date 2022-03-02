@@ -3,6 +3,7 @@
 namespace App\Services;
 
 
+use App\Repositories\Eloquent\TransactionRepository;
 use App\Repositories\TransactionRepositoryInterface;
 
 class TransactionService
@@ -10,7 +11,7 @@ class TransactionService
 
 
     /**
-     * @var TransactionRepositoryInterface
+     * @var TransactionRepository
      */
     private $transactionRepository;
 

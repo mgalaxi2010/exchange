@@ -25,8 +25,8 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         return $this->model->userWallet();
     }
 
-    public function userBalance()
+    public function userCoinBalance(string $coin)
     {
-        return $this->model->userBalance();
+        return $this->model->userCoinBalance($coin);
     }
 }

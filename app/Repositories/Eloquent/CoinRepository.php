@@ -5,7 +5,6 @@ namespace App\Repositories\Eloquent;
 use App\Http\Resources\CoinApiResource;
 use App\Models\Coin;
 use App\Repositories\CoinRepositoryInterface;
-use Symfony\Component\HttpFoundation\Response;
 
 class CoinRepository extends BaseRepository implements CoinRepositoryInterface
 {
@@ -26,8 +25,8 @@ class CoinRepository extends BaseRepository implements CoinRepositoryInterface
         return CoinApiResource::collection($this->model->all());
     }
 
-    public function defaultCurrency()
+    public function getCoinBySymbol(string $coin)
     {
-        return $this->model->defaultCurrency();
+        return $this->model->getCoinBySymbol($coin);
     }
 }

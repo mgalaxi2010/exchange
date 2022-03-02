@@ -2,11 +2,10 @@
 
 namespace App\Models;
 
-use App\Repositories\Eloquent\CoinRepository;
+use App\Repositories\Eloquent\CoinConvertRepository;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Laravel\Sanctum\HasApiTokens;
 
 
@@ -52,20 +51,19 @@ class User extends Authenticatable
         return Auth::user()->coins()->get();
     }
 
-    public static function userBalance()
+    public static function userCoinBalance($coin)
     {
-        return Auth::user()->coins()->where('coins.name', 'Rial')->first();
+        return Auth::user()->coins()->where('coins.symbol', strtoupper($coin))->first();
     }
 
     public function deposit($amount)
     {
         $user = Auth::user();
-        $oldBalance = self::userBalance();
-
+        $oldBalance = self::userCoinBalance("IRR");
         if ($oldBalance) {
             $user->coins()->wherePivot('coin_id', $oldBalance['pivot']['coin_id'])->updateExistingPivot($oldBalance['pivot']['coin_id'], ['users_coins.amount' => intval($oldBalance['pivot']['amount']) + $amount], false);
         } else {
-            $defaultCurrency = (new CoinRepository(new Coin()))->defaultCurrency();
+            $defaultCurrency = (new CoinConvertRepository(new Coin()))->getCoinBySymbol("IRR");
             $user->coins()->attach([$defaultCurrency['id'] => compact("amount")]);
         }
         return "wallet updated successfully";
