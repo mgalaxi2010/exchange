@@ -6,7 +6,9 @@ use App\Repositories\Eloquent\CoinConvertRepository;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Laravel\Sanctum\HasApiTokens;
+use Symfony\Component\HttpFoundation\Response;
 
 
 class User extends Authenticatable
@@ -46,6 +48,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(Transaction::class);
     }
+
     public function userWallet()
     {
         return Auth::user()->coins()->get();
@@ -56,16 +59,19 @@ class User extends Authenticatable
         return Auth::user()->coins()->where('coins.symbol', strtoupper($coin))->first();
     }
 
-    public function deposit($amount)
+    public function updateWallet($amount, $coin, $type): array
     {
         $user = Auth::user();
-        $oldBalance = self::userCoinBalance("IRR");
+        $oldBalance = self::userCoinBalance($coin);
         if ($oldBalance) {
-            $user->coins()->wherePivot('coin_id', $oldBalance['pivot']['coin_id'])->updateExistingPivot($oldBalance['pivot']['coin_id'], ['users_coins.amount' => intval($oldBalance['pivot']['amount']) + $amount], false);
+            $newAmount = ($type == 'deposit') ? (intval($oldBalance['pivot']['amount']) + $amount) : (intval($oldBalance['pivot']['amount']) - $amount);
+            $user->coins()->wherePivot('coin_id', $oldBalance['pivot']['coin_id'])->updateExistingPivot($oldBalance['pivot']['coin_id'], ['users_coins.amount' => $newAmount], false);
         } else {
-            $defaultCurrency = (new CoinConvertRepository(new Coin()))->getCoinBySymbol("IRR");
-            $user->coins()->attach([$defaultCurrency['id'] => compact("amount")]);
+            $getCoin = (new CoinConvertRepository(new Coin()))->getCoinBySymbol($coin);
+            $user->coins()->attach([$getCoin['id'] => compact("amount")]);
         }
-        return "wallet updated successfully";
+        return [
+            'status' => Response::HTTP_OK,
+            'result' => "wallet updated successfully"];
     }
 }

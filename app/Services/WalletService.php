@@ -13,6 +13,7 @@ use App\Repositories\UserRepositoryInterface;
 use App\Repositories\WalletRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class WalletService
 {
@@ -32,16 +33,16 @@ class WalletService
         $this->userRepository = $userRepository;
     }
 
-    public function deposit($amount)
+    public function updateWallet($amount,$coin,$type): array
     {
 
         try {
             DB::beginTransaction();
 
-            $lastBalance = $this->userRepository->userCoinBalance('IRR');
-
+            $lastBalance = $this->userRepository->userCoinBalance($coin);
+            $lastBalance = $lastBalance ? floatval($lastBalance['pivot']['amount']) : 0;
             // update user-coin
-            $this->walletRepository->deposit($amount);
+            $result = $this->walletRepository->updateWallet($amount,$coin,$type);
 
             // add transaction
             $coinRepo = new CoinRepository(new Coin());
@@ -53,16 +54,18 @@ class WalletService
                 'transaction_type_id' => $transactionType['id'],
                 'coin_id_from' => $Rial['id'],
                 'price_from' => floatval($Rial['price']),
-                'amount_from' => floatval($lastBalance['pivot']['amount']),
+                'amount_from' => $lastBalance,
                 'coin_id_to' => $Rial['id'],
                 'price_to' => floatval($Rial['price']),
-                'amount_to' => floatval($amount) + floatval($lastBalance['pivot']['amount'])
+                'amount_to' => floatval($amount) + $lastBalance
             ];
             $transactionRepo->create($transactionData);
 
             DB::commit();
+            return $result;
         } catch (\Exception $exception) {
             DB::rollBack();
+            return $exception->getMessage();
         }
 
     }

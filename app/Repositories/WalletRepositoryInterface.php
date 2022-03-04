@@ -5,5 +5,5 @@ namespace App\Repositories;
 interface WalletRepositoryInterface
 {
 
-    public function deposit($request);
+    public function updateWallet(float $amount,string $coin,string $type);
 }

@@ -22,6 +22,6 @@ class TransactionController extends Controller
 
     public function transactions()
     {
-        return $this->transactionService->userTransaction();
+        return response()->json($this->transactionService->userTransaction());
     }
 }

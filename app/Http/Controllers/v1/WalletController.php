@@ -22,7 +22,7 @@ class WalletController extends Controller
 
     public function deposit(WalletRequest $request)
     {
-        $result = $this->walletService->deposit($request['amount']);
+        $result = $this->walletService->updateWallet($request['amount'],'IRR','deposit');
         return response()->json($result);
     }
 

@@ -15,9 +15,8 @@ class WalletRepository extends BaseRepository implements WalletRepositoryInterfa
         parent::__construct($model);
     }
 
-    public function deposit($request)
+    public function updateWallet(float $amount, string $coin, string $type)
     {
-        return $this->model->deposit($request);
+        return $this->model->updateWallet($amount, $coin, $type);
     }
-
 }

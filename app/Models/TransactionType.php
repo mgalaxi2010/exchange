@@ -13,4 +13,5 @@ class TransactionType extends Model
     {
         return self::where('title',$title)->first();
     }
+
 }
