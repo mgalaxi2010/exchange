@@ -11,9 +11,26 @@ return [
         'api_key' => env('USDT_NAVASAN_API_KEY', 'free2kBGVAyqEwG8K20JzAOdwexPgeUU'),
     ],
 
-    'commission'=>[
-        'convert'=>[
-            'fee'=>0.03
+    'coinConvertValidation'=>[
+        'eth'=>[
+            'max'=>5,
+            'min'=>0.0004
+        ],
+        'btc'=>[
+            'max'=>0.5,
+            'min'=>0.00025
+        ],
+        "usdt"=>[
+            'max'=>10000,
+            'min'=>10
+        ],
+        "shib"=>[
+            'max'=>40000000,
+            'min'=>400000
+        ],
+        "irr"=>[
+            'max'=>500000000,
+            'min'=>500000
         ]
     ]
 ];

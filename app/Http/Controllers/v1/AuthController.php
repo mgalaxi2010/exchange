@@ -18,8 +18,8 @@ use function response;
 class AuthController extends Controller
 {
 
-    protected $authService;
-    private $userService;
+    protected AuthService $authService;
+    private UserService $userService;
 
     public function __construct(AuthService $authService, UserService $userService)
     {

@@ -2,31 +2,28 @@
 
 namespace App\Repositories\Eloquent;
 
-use App\Http\Resources\WalletApiResource;
+
 use App\Models\User;
 use App\Repositories\UserRepositoryInterface;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 
 class UserRepository extends BaseRepository implements UserRepositoryInterface
 {
 
-    public function __construct(User $model)
+    function getModel(): Model
     {
-        parent::__construct($model);
-    }
-
-    public function coins()
-    {
-        return WalletApiResource::collection($this->model->userWallet());
+        return new User();
     }
 
     public function userWallet()
     {
-        return $this->model->userWallet();
+        return Auth::user()->coins()->get();
     }
 
     public function userCoinBalance(string $coin)
     {
-        return $this->model->userCoinBalance($coin);
+        return Auth::user()->coins()->where('coins.symbol', strtoupper($coin))->first();
     }
 }

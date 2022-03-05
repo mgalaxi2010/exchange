@@ -5,19 +5,13 @@ namespace App\Repositories\Eloquent;
 use App\Repositories\EloquentRepositoryInterface;
 use Illuminate\Database\Eloquent\Model;
 
-class BaseRepository implements EloquentRepositoryInterface
+abstract class BaseRepository implements EloquentRepositoryInterface
 {
-
-    protected $model;
-
-    public function __construct(Model $model)
-    {
-        $this->model = $model;
-    }
+    abstract function getModel(): Model;
 
     public function create(array $attributes): Model
     {
-        return $this->model->create($attributes);
+        return $this->getModel()->query()->create($attributes);
     }
 
 }

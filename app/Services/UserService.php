@@ -25,7 +25,7 @@ class UserService
 
     public function coins()
     {
-        return $this->userRepository->coins();
+        return $this->userRepository->userWallet();
     }
 
 }

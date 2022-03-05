@@ -9,4 +9,5 @@ interface EloquentRepositoryInterface
 
     public function create(array $attributes): Model;
 
+
 }

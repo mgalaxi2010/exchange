@@ -2,10 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\Transaction;
-use App\Models\TransactionType;
-use App\Repositories\CoinConvertRepositoryInterface;
-use App\Repositories\Eloquent\TransactionRepository;
+use App\Repositories\CoinRepositoryInterface;
+use App\Repositories\TransactionRepositoryInterface;
+use App\Repositories\UserRepositoryInterface;
 use App\Repositories\WalletRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -14,56 +13,73 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CoinConvertService
 {
+    private UserRepositoryInterface $userRepository;
+    private WalletRepositoryInterface $walletRepository;
+    private transactionRepositoryInterface $transactionRepository;
+    private coinRepositoryInterface $coinRepository;
 
-    /**
-     * @var CoinConvertRepositoryInterface
-     */
-    private $coinConvertRepository;
-    private $walletRepository;
-
-    public function __construct(CoinConvertRepositoryInterface $coinConvertRepository, WalletRepositoryInterface $walletRepository)
+    public function __construct(UserRepositoryInterface        $userRepository,
+                                WalletRepositoryInterface      $walletRepository,
+                                TransactionRepositoryInterface $transactionRepository,
+                                CoinRepositoryInterface        $coinRepository)
     {
-        $this->coinConvertRepository = $coinConvertRepository;
+        $this->userRepository = $userRepository;
         $this->walletRepository = $walletRepository;
+        $this->transactionRepository = $transactionRepository;
+        $this->coinRepository = $coinRepository;
     }
 
     public function convertCoin($request): array
     {
-        $userCoinBalance = $this->userCoinBalance($request);
-
-        if ($userCoinBalance) {
-            if ($this->validateAndConvert($request, $userCoinBalance)) {
-                $message = "coin converted successfully";
+        try {
+            $userCoinBalance = $this->userCoinBalance($request['convert_from']);
+            if ($userCoinBalance) {
+                if ($this->validateAndConvert($request, $userCoinBalance)) {
+                    $message = "coin converted successfully";
+                } else {
+                    $message = "your balance and the amount for converting do not match";
+                }
             } else {
-                $message = "your balance and the amount for converting do not match";
+                $message = "your balance isn't enough for convert";
             }
-        } else {
-            $message = "your balance isn't enough for convert";
+            $result = ['status' => Response::HTTP_OK, 'result' => $message];
+        } catch (\Exception $e) {
+            $result = [
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+                'result' => $e->getMessage()
+            ];
         }
 
-        return ['status' => Response::HTTP_OK, 'result' => $message];
+        return $result;
     }
 
-    public function userCoinBalance($request)
+    public function userCoinBalance($coin)
     {
-        return $this->coinConvertRepository->getUserCoinBalance($request['convert_from']);
+        return $this->userRepository->userCoinBalance($coin);
     }
 
     public function validateAndConvert($request, $userCoinBalance): bool
     {
-        $getConvertTo = $this->coinConvertRepository->getCoinBySymbol($request['convert_to']);
-
+        $getConvertTo = $this->coinRepository->getCoinBySymbol($request['convert_to']);
         $userBalance = floatval($userCoinBalance['pivot']['amount']) * floatval($userCoinBalance['price']);
         $convertToPrice = floatval($getConvertTo['price']);
+
         $amountTo = floatval($request['amount_to']);
-        $amountFrom = (floatval($request['amount_from']) * floatval($userCoinBalance['price']) - floatval($getConvertTo['price']) * $amountTo) / floatval($userCoinBalance['price']);
+        $amountFrom = floatval($request['amount_from']);
 
         if ($userBalance >= $convertToPrice * $amountTo) {
             try {
                 DB::beginTransaction();
+
+                // amountTo null means convert all the user balance to new coin
+                if ($amountTo > 0) {
+                    $amountFrom = $convertToPrice * $amountTo /  floatval($userCoinBalance['price']);
+                    Log::info($amountFrom);
+                } else {
+                    $amountTo = $amountFrom * floatval($userCoinBalance['price'])/ $convertToPrice;
+                }
                 // add transaction
-                $transactionRepo = new TransactionRepository(new Transaction(), new TransactionType());
-                $transactionType = $transactionRepo->getTransactionType('convert');
+                $transactionType = $this->transactionRepository->getTransactionType('convert');
 
                 $transactionData = [
                     'user_id' => $userCoinBalance['pivot']['user_id'],
@@ -73,13 +89,13 @@ class CoinConvertService
                     'amount_from' => $amountFrom,
                     'coin_id_to' => $getConvertTo['id'],
                     'price_to' => $convertToPrice,
-                    'amount_to' => $amountTo,
-                    'commission' => config('api.commission.convert.fee')
+                    'amount_to' => $amountTo
                 ];
 
-                $transactionRepo->create($transactionData);
+                $this->transactionRepository->create($transactionData);
 
-                // update user-coins
+                // update user-coin
+
                 $this->walletRepository->updateWallet($amountFrom, $request['convert_from'], 'withdrawal');
                 $this->walletRepository->updateWallet($amountTo, $request['convert_to'], 'deposit');
 

@@ -2,31 +2,29 @@
 
 namespace App\Repositories\Eloquent;
 
-use App\Http\Resources\CoinApiResource;
 use App\Models\Coin;
 use App\Repositories\CoinRepositoryInterface;
+use Illuminate\Database\Eloquent\Model;
 
 class CoinRepository extends BaseRepository implements CoinRepositoryInterface
 {
 
-    /**
-     * @var Coin
-     */
-    protected $coin;
+    protected Coin $coin;
 
-    public function __Construct(Coin $coin)
+    function getModel(): Model
     {
-        parent::__construct($coin);
+        return new Coin();
     }
-
 
     public function coins()
     {
-        return CoinApiResource::collection($this->model->all());
+        return $this->getModel()->all();
     }
 
     public function getCoinBySymbol(string $coin)
     {
-        return $this->model->getCoinBySymbol($coin);
+        return $this->getModel()::where('symbol',strtoupper($coin))->first();
     }
+
+
 }

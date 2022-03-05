@@ -9,10 +9,8 @@ use Illuminate\Http\Request;
 class TransactionController extends Controller
 {
 
-    /**
-     * @var TransactionService
-     */
-    protected $transactionService;
+
+    protected TransactionService $transactionService;
 
     public function __construct(TransactionService $transactionService)
     {

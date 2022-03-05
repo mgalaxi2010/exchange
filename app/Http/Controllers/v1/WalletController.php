@@ -10,10 +10,7 @@ use App\Services\WalletService;
 class WalletController extends Controller
 {
 
-    /**
-     * @var WalletService
-     */
-    protected $walletService;
+    protected WalletService $walletService;
 
     public function __construct(WalletService $walletService)
     {

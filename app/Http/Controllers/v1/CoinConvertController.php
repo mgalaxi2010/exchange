@@ -11,10 +11,8 @@ use Illuminate\Support\Facades\Log;
 class CoinConvertController extends Controller
 {
 
-    /**
-     * @var CoinConvertService
-     */
-    protected $coinConvertService;
+
+    protected CoinConvertService $coinConvertService;
 
     public function __construct(CoinConvertService $coinConvertService)
     {

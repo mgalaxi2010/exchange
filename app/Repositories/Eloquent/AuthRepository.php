@@ -4,6 +4,7 @@ namespace App\Repositories\Eloquent;
 
 use App\Models\User;
 use App\Repositories\AuthRepositoryInterface;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Log;
@@ -12,14 +13,9 @@ use Illuminate\Support\Facades\Validator;
 class AuthRepository extends BaseRepository implements AuthRepositoryInterface
 {
 
-    /**
-     * @var User
-     */
-    protected $user;
-
-    public function __construct(User $user)
+    function getModel(): Model
     {
-        parent::__Construct($user);
+        return new User();
     }
 
     public function AuthenticateUser(array $data): bool
@@ -36,4 +32,5 @@ class AuthRepository extends BaseRepository implements AuthRepositoryInterface
     {
         return Auth::user()->tokens()->delete();
     }
+
 }
