@@ -48,9 +48,12 @@ class UpdateCoins extends Command
         $dollar = $httpClient->get($dollar_api);
         $coins_response = json_decode($coins->getBody()->getContents(), true);
         $dollar_response = json_decode($dollar->getBody()->getContents(), true);
+        $dollarPrice = $dollar_response['usdt']['value'] * 10;
 
-        Coin::updateOrCreate(['name' => 'Rial', 'symbol' => 'IRR'], ['price' => 1 / ($dollar_response['usdt']['value'] * 10), 'created_at' => Carbon::now()]);
+        Coin::updateOrCreate(['name' => 'Rial', 'symbol' => 'IRR'], ['price' => 1 / $dollarPrice, 'created_at' => Carbon::now()]);
+
         Coin::updateOrCreate(['name' => 'Usdt', 'symbol' => 'USDT'], ['price' => 1, 'created_at' => Carbon::now()]);
+
         foreach ($coins_response as $coin) {
             Coin::updateOrCreate(['name' => $coin['name']], ['symbol' => strtoupper($coin['symbol']), 'price' => $coin['current_price'], 'created_at' => Carbon::now()]);
         }

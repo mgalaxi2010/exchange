@@ -7,7 +7,6 @@ use App\Repositories\CoinRepositoryInterface;
 use App\Repositories\Eloquent\TransactionRepository;
 use App\Repositories\UserRepositoryInterface;
 use App\Repositories\WalletRepositoryInterface;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -33,43 +32,37 @@ class WalletService
         $this->walletRepository = $walletRepository;
     }
 
-    public function updateWallet($amount, $coin, $type): array
+    public function updateWallet($data): array
     {
 
         try {
             DB::beginTransaction();
 
-            $lastBalance = $this->userRepository->userCoinBalance($coin);
+            $lastBalance = $this->userRepository->userCoinBalance($data['user_id'],$data['coin']);
             $lastBalanceAmount = $lastBalance ? floatval($lastBalance['pivot']['amount']) : 0;
 
             // update user-coin
-            $user = Auth::user();
-            $RialCoin = $this->coinRepository->getCoinBySymbol($coin);
-
-            if ($lastBalance) {
-                $newAmount = ($type == 'deposit') ? (floatval($lastBalance['pivot']['amount']) + $amount) : (floatval($lastBalance['pivot']['amount']) - floatval($amount));
-                $user->coins()->lockForUpdate()->wherePivot('coin_id', $lastBalance['pivot']['coin_id'])->updateExistingPivot($lastBalance['pivot']['coin_id'], ['users_coins.amount' => $newAmount], false);
-            } else {
-                $user->coins()->lockForUpdate()->attach([$RialCoin['id'] => compact("amount")]);
-            }
-            $result = [
-                'status' => Response::HTTP_OK,
-                'result' => "wallet updated successfully"];
+            $user = $this->userRepository->findById($data['user_id']);
+            $coin = $this->coinRepository->getCoinBySymbol($data['coin']);
+            $data['last_balance']=$lastBalanceAmount;
+            $data['isNew'] = (bool)$lastBalance;
+            $data['coin_id'] = $coin['id'];
+            $this->userRepository->updateUserWallet($data);
 
             // add transaction
-            $transactionType = $this->transactionRepository->getTransactionType('deposit');
+            $transactionType = $this->transactionRepository->getTransactionType($data['type']);
             $transactionData = [
-                'user_id' => Auth::id(),
+                'user_id' => $data['user_id'],
                 'transaction_type_id' => $transactionType['id'],
-                'coin_id_from' => $RialCoin['id'],
-                'price_from' => floatval($RialCoin['price']),
-                'amount_from' => $lastBalanceAmount,
-                'coin_id_to' => $RialCoin['id'],
-                'price_to' => floatval($RialCoin['price']),
-                'amount_to' => floatval($amount) + $lastBalanceAmount
+                'coin_id' => $coin['id'],
+                'price' => floatval($coin['price']),
+                'amount' => $data['amount'],
             ];
             $this->transactionRepository->create($transactionData);
-
+            $result=[
+                'status' => Response::HTTP_OK,
+                'result' => "wallet updated successfully"
+            ];
             DB::commit();
 
         } catch (\Exception $exception) {

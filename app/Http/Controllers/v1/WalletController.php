@@ -5,6 +5,7 @@ namespace App\Http\Controllers\v1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\WalletRequest;
 use App\Services\WalletService;
+use Illuminate\Support\Facades\Auth;
 
 
 class WalletController extends Controller
@@ -19,7 +20,13 @@ class WalletController extends Controller
 
     public function deposit(WalletRequest $request)
     {
-        $result = $this->walletService->updateWallet($request['amount'],'IRR','deposit');
+        $data = [
+          'user_id'=>Auth::id(),
+          'type'=>'deposit',
+          'amount'=>$request['amount'],
+          'coin'=>'IRR'
+        ];
+        $result = $this->walletService->updateWallet($data);
         return response()->json($result);
     }
 

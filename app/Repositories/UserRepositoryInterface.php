@@ -6,5 +6,11 @@ interface UserRepositoryInterface
 {
     public function userWallet();
 
-    public function userCoinBalance(string $coin);
+    public function findById(int $id);
+
+    public function userCoinBalance(int $id, string $coin);
+
+    public function updateUserWallet(array $data);
+
+    public function getBrokerId();
 }

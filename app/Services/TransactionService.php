@@ -21,7 +21,7 @@ class TransactionService
         $this->transactionRepository = $transactionRepository;
     }
 
-    public function userTransaction()
+    public function userTransaction(): array
     {
         return $this->transactionRepository->userTransactions();
     }

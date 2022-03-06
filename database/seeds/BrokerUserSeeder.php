@@ -10,16 +10,18 @@ class BrokerUserSeeder extends Seeder
      *
      * @return void
      */
+
     public function run()
     {
         DB::table('users')->insert([
-            'email'=>'broker@gmail.com',
+            'email'=>'broker@exchange.com',
             'password'=>bcrypt(1234)
         ]);
         DB::table('users_coins')->insert([
             'user_id'=>1,
             'coin_id'=>1,
-            'amount'=>100000000000
+            'amount'=> env('BROKER_WALLET_AMOUNT',100000000000)
         ]);
+
     }
 }

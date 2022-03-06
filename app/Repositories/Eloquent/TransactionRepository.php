@@ -5,6 +5,7 @@ namespace App\Repositories\Eloquent;
 use App\Models\Transaction;
 use App\Models\TransactionType;
 use App\Repositories\TransactionRepositoryInterface;
+use http\Env\Response;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
@@ -25,22 +26,30 @@ class TransactionRepository extends BaseRepository implements TransactionReposit
         $this->transactionTypeModel = $transactionTypeModel;
     }
 
-    public function userTransactions()
+    public function userTransactions(): array
     {
-        return $this->getModel()->join('users', 'transactions.user_id', '=', 'users.id')
-            ->join('coins as from', 'transactions.coin_id_from', '=', 'from.id')
-            ->join('coins as to', 'transactions.coin_id_to', '=', 'to.id')
-            ->join('transaction_types', 'transactions.transaction_type_id', '=', 'transaction_types.id')
-            ->where('users.id', Auth::id())
-            ->select('from.symbol as coin_from',
-                'transactions.price_from',
-                'transactions.amount_from',
-                'to.symbol as coin_to',
-                'transactions.price_to',
-                'transactions.amount_to',
-                'transaction_types.title as type'
-            )
-            ->get();
+        try {
+            $transactions =  $this->getModel()->join('users', 'transactions.user_id', '=', 'users.id')
+                ->join('coins', 'transactions.coin_id', '=', 'coins.id')
+                ->join('transaction_types', 'transactions.transaction_type_id', '=', 'transaction_types.id')
+                ->where('users.id', Auth::id())
+                ->select('coins.symbol',
+                    'transactions.price',
+                    'transactions.amount',
+                    'transaction_types.title as type',
+                    'transactions.created_at'
+                )->get();
+            $result = [
+              'status'=>\Symfony\Component\HttpFoundation\Response::HTTP_OK,
+              'transactions'=>$transactions
+            ];
+        }catch (\Exception $e){
+            $result = [
+                'status'=>\Symfony\Component\HttpFoundation\Response::HTTP_INTERNAL_SERVER_ERROR,
+                'error'=>$e->getMessage()
+            ];
+        }
+        return $result;
     }
 
     public function getTransactionType(string $type)

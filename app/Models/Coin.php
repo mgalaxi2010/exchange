@@ -8,7 +8,7 @@ class Coin extends Model
 {
 
     public $timestamps = true;
-    protected $fillable = ['name', 'symbol', 'price'];
+    protected $fillable = ['name', 'symbol', 'price','max_broker_amount'];
 
     public function users()
     {

@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Rules\MaxCoinRule;
+use App\Rules\CoinConvertRangeRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ConvertCoinRequest extends FormRequest
@@ -26,9 +26,9 @@ class ConvertCoinRequest extends FormRequest
     {
         return [
             'convert_from'=>'bail|required|string',
-            'amount_from'=>['bail','nullable','numeric',new MaxCoinRule($this->request->get('convert_from'))],
+            'amount_from'=>['bail','required','numeric',new CoinConvertRangeRule($this->request->get('convert_from'))],
             'convert_to'=>'bail|required|string',
-            'amount_to'=>['bail','nullable','numeric',new MaxCoinRule($this->request->get('convert_to'))],
+            'amount_to'=>['bail','required','numeric',new CoinConvertRangeRule($this->request->get('convert_to'))],
         ];
     }
 
@@ -37,10 +37,12 @@ class ConvertCoinRequest extends FormRequest
         return [
             'convert_from.required'=>'this field is required',
             'convert_from.string'=>'enter the coin symbol (ex Btc)',
+            'amount_from.required'=>'this field is required',
             'amount_from.numeric'=>'enter a valid number',
             'convert_to.required'=>'this field is required',
             'convert_to.string'=>'enter the coin symbol (ex Eth)',
             'amount_to.numeric'=>'enter a valid number',
+            'amount_to.required'=>'this field is required',
         ];
     }
 }

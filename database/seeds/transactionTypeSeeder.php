@@ -16,7 +16,7 @@ class transactionTypeSeeder extends Seeder
             'title'=>'deposit'
         ]);
         DB::table('transaction_types')->insert([
-            'title'=>'convert'
+            'title'=>'withdrawal'
         ]);
     }
 }
