@@ -16,4 +16,11 @@ class helper
         return $dollar_response['usdt']['value'];
     }
 
+    public static function getCoinPrices()
+    {
+        $httpClient = new Client();
+        $coin_api = config('api.coinGecko.market') . '?' . config('api.coinGecko.coins');
+        $coins = $httpClient->get($coin_api);
+        return json_decode($coins->getBody()->getContents(), true);
+    }
 }

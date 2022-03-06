@@ -50,10 +50,9 @@ class WalletService
             $this->userRepository->updateUserWallet($data);
 
             // add transaction
-            $transactionType = $this->transactionRepository->getTransactionType($data['type']);
             $transactionData = [
                 'user_id' => $data['user_id'],
-                'transaction_type_id' => $transactionType['id'],
+                'type' => $data['type'],
                 'coin_id' => $coin['id'],
                 'price' => floatval($coin['price']),
                 'amount' => $data['amount'],

@@ -3,6 +3,7 @@
 namespace App\Repositories\Eloquent;
 
 
+use App\Models\Transaction;
 use App\Models\User;
 use App\Repositories\UserRepositoryInterface;
 use Illuminate\Database\Eloquent\Model;
@@ -36,7 +37,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     {
 
         $user = $this->findById($data['user_id']);
-        $new_balance = $data['type'] == 'deposit' ? $data['amount'] + $data['last_balance'] : $data['amount'] - $data['last_balance'];
+        $new_balance = $data['type'] == Transaction::DEPOSIT ? $data['amount'] + $data['last_balance'] : $data['amount'] - $data['last_balance'];
         if ($data['isNew']) {
             $user->coins()->lockForUpdate()->wherePivot('coin_id', $data['coin_id'])->updateExistingPivot($data['coin_id'], ['users_coins.amount' => $new_balance], false);
         } else {
@@ -47,6 +48,6 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
 
     public function getBrokerId()
     {
-        return $this->getModel()->query()->where('email','=','broker@exchange.com')->first();
+        return $this->getModel()->query()->where('email', '=', 'broker@exchange.com')->first();
     }
 }
