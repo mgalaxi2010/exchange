@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use PHPUnit\Exception;
 use Symfony\Component\HttpFoundation\Response;
 use function response;
 
@@ -33,8 +34,18 @@ class AuthController extends Controller
     public function register(UserRequest $request)
     {
         $data = ['email' => $request['email'], 'password' => $request['password']];
-        $this->userService->create($data);
-        return response(["message" => "user registered successfully"]);
+        try {
+            $this->userService->create($data);
+            $result = [
+                "status"=>Response::HTTP_OK,
+                "message" => "user registered successfully"];
+        }catch (Exception $e){
+            $result = [
+                "status"=>Response::HTTP_INTERNAL_SERVER_ERROR,
+                "error"=>$e->getMessage()
+            ];
+        }
+        return response($result);
     }
 
     public function login(Request $request)
