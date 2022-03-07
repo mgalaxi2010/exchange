@@ -46,7 +46,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
 
     }
 
-    public function getBrokerId()
+    public function getBrokerUser()
     {
         return $this->getModel()->query()->where('email', '=', 'broker@exchange.com')->first();
     }

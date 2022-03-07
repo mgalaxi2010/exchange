@@ -11,7 +11,8 @@ use Illuminate\Support\Facades\Log;
 class CoinConvertRangeRule implements Rule
 {
     private string $coin;
-    protected string $message = "" ;
+    protected string $message = "";
+    private UserRepository $userRepository;
 
     /**
      * Create a new rule instance.
@@ -21,33 +22,32 @@ class CoinConvertRangeRule implements Rule
     public function __construct(string $coin)
     {
         $this->coin = $coin;
+        $this->userRepository = new UserRepository();
     }
 
     /**
      * Determine if the validation rule passes.
      *
-     * @param  string  $attribute
-     * @param  mixed  $value
+     * @param string $attribute
+     * @param mixed $value
      * @return bool
      */
     public function passes($attribute, $value)
     {
-//        $dollar = helper::getDollarPrice();
-//        $brokerWallet = env('BROKER_WALLET_AMOUNT') / ($dollar*10);
-//        $coins = helper::getCoinsPrice();
 
-
-//        $maxCoin = config('api.coinConvertValidation.'.strtolower($this->coin).'.max');
-//       if( $maxCoin < $value){
-//           $this->message = "input must be less than ".$maxCoin;
-//           return false;
-//       }
-//       $minCoin = config('api.coinConvertValidation.'.strtolower($this->coin).'.min');
-//        if( $minCoin > $value){
-//            $this->message = "input must be more than ".$minCoin;
-//            return false;
-//        }
-       return true;
+        $broker = $this->userRepository->getBrokerUser();
+        $brokerCoin = $this->userRepository->userCoinBalance($broker['id'], $this->coin);
+        $dollar = helper::getDollarPrice();
+        if ($brokerCoin['pivot']['amount'] < $value) {
+            $this->message = "input must be less than or equel " . $brokerCoin['pivot']['amount'];
+            return false;
+        }
+        $minCoin = 100000 / (floatval($brokerCoin['price']) * $dollar);
+        if ($minCoin > $value) {
+            $this->message = "input must be more than or equel " . $minCoin;
+            return false;
+        }
+        return true;
     }
 
     /**

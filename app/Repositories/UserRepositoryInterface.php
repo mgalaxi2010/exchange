@@ -12,5 +12,5 @@ interface UserRepositoryInterface
 
     public function updateUserWallet(array $data);
 
-    public function getBrokerId();
+    public function getBrokerUser();
 }
