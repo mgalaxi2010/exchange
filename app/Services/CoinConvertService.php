@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Transaction;
 use App\Repositories\CoinRepositoryInterface;
 use App\Repositories\TransactionRepositoryInterface;
 use App\Repositories\UserRepositoryInterface;
@@ -61,30 +62,95 @@ class CoinConvertService
 
     public function validateAndConvert($request, $userCoinBalance): bool
     {
-        $brokerId = $this->userRepository->getBrokerId();
+        $brokerUser = $this->userRepository->getBrokerUser();
+        $brokerBalance = $this->userRepository->userCoinBalance($brokerUser['id'],$request['convert_to']);
+
         $getConvertTo = $this->coinRepository->getCoinBySymbol($request['convert_to']);
+        $getConvertFrom = $this->coinRepository->getCoinBySymbol($request['convert_from']);
         $userBalance = floatval($userCoinBalance['pivot']['amount']) * floatval($userCoinBalance['price']);
-        $brokerBalance = $this->userRepository->userCoinBalance($brokerId,$request['convert_to']);
 
 
-        if ($userBalance >= floatval($getConvertTo['price']) * floatval($request['amount_to'])) {
+        if ( $userBalance >= floatval($getConvertTo['price']) * floatval($getConvertTo['pricw'])  &&
+            floatval($getConvertFrom['price']) * floatval($request['amount_from']) == floatval($getConvertTo['price']) * floatval($request['amount_to'])) {
             try {
                 DB::beginTransaction();
 
-                // add transaction
-                $transactionType = $this->transactionRepository->getTransactionType('convert');
-                $transactionData = [
+                // withdrawal user coin
+                $transactionData1 = [
                     'user_id' => $userCoinBalance['pivot']['user_id'],
-                    'transaction_type_id' => $transactionType['id'],
+                    'type' => Transaction::WITHDRAWAL,
                     'coin_id' => $userCoinBalance['pivot']['coin_id'],
                     'price' => $userCoinBalance['price'],
                     'amount' => $request['amount_from'],
                 ];
+                $this->transactionRepository->create($transactionData1);
+                $data1 = [
+                    'user_id'=>$userCoinBalance['pivot']['user_id'],
+                    'coin_id'=>$getConvertFrom['id'],
+                    'type'=> Transaction::WITHDRAWAL,
+                    'amount'=> $request['amount_from'],
+                    'last_balance'=>$userCoinBalance['price'],
+                    'isNew'=>(bool)$userCoinBalance
+                ];
+                $this->userRepository->updateUserWallet($data1);
 
-                $this->transactionRepository->create($transactionData);
+                // deposit broker coin
+                $transactionData2 = [
+                    'user_id' => $brokerUser['id'],
+                    'type' => Transaction::DEPOSIT,
+                    'coin_id' => $userCoinBalance['pivot']['coin_id'],
+                    'price' => $userCoinBalance['price'],
+                    'amount' => $request['amount_from'],
+                ];
+                $this->transactionRepository->create($transactionData2);
+                $data2 = [
+                    'user_id'=>$brokerUser['id'],
+                    'coin_id'=>$getConvertFrom['id'],
+                    'type'=> Transaction::DEPOSIT,
+                    'amount'=> $request['amount_from'],
+                    'last_balance'=>$userCoinBalance['price'],
+                    'isNew'=>(bool)$brokerBalance
+                ];
+                $this->userRepository->updateUserWallet($data2);
 
-                // update user-coin
+                /// deposit user coin
+                $transactionData3 = [
+                    'user_id' => $userCoinBalance['pivot']['user_id'],
+                    'type' => Transaction::DEPOSIT,
+                    'coin_id' => $getConvertTo['id'],
+                    'price' => $getConvertTo['price'],
+                    'amount' => $request['amount_to'],
+                ];
+                $this->transactionRepository->create($transactionData3);
+                $data3 = [
+                    'user_id'=>$userCoinBalance['pivot']['user_id'],
+                    'coin_id'=>$getConvertFrom['id'],
+                    'type'=> Transaction::DEPOSIT,
+                    'amount'=> $request['amount_from'],
+                    'last_balance'=>$userCoinBalance['price'],
+                    'isNew'=>(bool)$userCoinBalance
+                ];
+                $this->userRepository->updateUserWallet($data3);
 
+
+                // withdraw broker
+                $transactionData4 = [
+                    'user_id' => $brokerUser['id'],
+                    'type' => Transaction::WITHDRAWAL,
+                    'coin_id' => $getConvertTo['id'],
+                    'price' => $getConvertTo['price'],
+                    'amount' => $request['amount_to'],
+                ];
+                $this->transactionRepository->create($transactionData4);
+                $data4 = [
+                    'user_id'=>$brokerUser['id'],
+                    'coin_id'=>$getConvertTo['id'],
+                    'type'=> Transaction::WITHDRAWAL,
+                    'amount'=> $request['amount_to'],
+                    'last_balance'=>$brokerBalance['price'],
+                    'isNew'=>(bool)$brokerBalance
+                ];
+                $this->userRepository->updateUserWallet($data4);
 
 
                 DB::commit();
