@@ -17,7 +17,8 @@ class CreateCoinsTable extends Migration
             $table->increments('id')->unsigned();
             $table->string('name',20);
             $table->string('symbol',5);
-            $table->decimal('price',20,8)->nullable()->unsigned();
+            $table->decimal('price',38,18)->nullable()->unsigned();
+            $table->decimal('min_buy_price',38,18)->nullable()->unsigned();
             $table->timestamps();
         });
     }

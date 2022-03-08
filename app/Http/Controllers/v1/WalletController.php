@@ -9,6 +9,7 @@ use App\Services\WalletService;
 use Illuminate\Support\Facades\Auth;
 
 
+
 class WalletController extends Controller
 {
 
@@ -27,6 +28,7 @@ class WalletController extends Controller
           'amount'=>$request['amount'],
           'coin'=>'IRR'
         ];
+
         $result = $this->walletService->updateWallet($data);
         return response()->json($result);
     }

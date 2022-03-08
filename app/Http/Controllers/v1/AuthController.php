@@ -35,10 +35,17 @@ class AuthController extends Controller
     {
         $data = ['email' => $request['email'], 'password' => $request['password']];
         try {
-            $this->userService->create($data);
-            $result = [
-                "status"=>Response::HTTP_OK,
-                "message" => "user registered successfully"];
+            $user = $this->userService->create($data);
+            if($user) {
+                $result = [
+                    "status" => Response::HTTP_OK,
+                    "message" => "user registered successfully"];
+            }else{
+                $result = [
+                    "status"=>Response::HTTP_INTERNAL_SERVER_ERROR,
+                    "error"=>"something went wrong try again later."
+                ];
+            }
         }catch (Exception $e){
             $result = [
                 "status"=>Response::HTTP_INTERNAL_SERVER_ERROR,
@@ -50,27 +57,41 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $data = ['email'=>$request['email'],'password'=>$request['password']];
-        $authenticated = $this->authService->AuthenticateUser($data);
-        if (!$authenticated) {
-            return response([
-                'message' => "Invalid email or password"
-            ], Response::HTTP_UNAUTHORIZED);
-        }
+        try {
+            $data = ['email' => $request['email'], 'password' => $request['password']];
+            $authenticated = $this->authService->AuthenticateUser($data);
+            if (!$authenticated) {
+                return response([
+                    'message' => "Invalid email or password"
+                ], Response::HTTP_UNAUTHORIZED);
+            }
 
-        $token = $this->authService->generateToken();
-        return response([
-            'message' => 'successful login',
-            'access_token' => $token
-        ], Response::HTTP_OK);
+            $token = $this->authService->generateToken();
+            return response([
+                'message' => 'successful login',
+                'access_token' => $token
+            ], Response::HTTP_OK);
+        }catch (\Exception $e){
+            return response([
+                'error' => $e->getMessage(),
+                'access_token' => '',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR
+            );
+        }
     }
 
     public function logout()
     {
-        $this->authService->deleteToken();
-        return response([
-            'message' => 'successful logout',
-            'access_token' => ''
-        ]);
+        try {
+            $this->authService->deleteToken();
+            return response([
+                'message' => 'successful logout',
+                'access_token' => ''
+            ],Response::HTTP_OK);
+        }catch (\Exception $exception){
+            return response([
+                'error' => $exception->getMessage(),
+            ],Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }

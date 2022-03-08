@@ -17,7 +17,7 @@ class CoinApiResource extends JsonResource
         return [
             'name' => $this->name,
             'symbol' => $this->symbol,
-            'price' => $this->price,
+            'price' => floatval($this->price),
         ];
     }
 }

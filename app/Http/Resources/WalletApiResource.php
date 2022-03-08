@@ -15,7 +15,7 @@ class WalletApiResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'amount' => $this->pivot->amount,
+            'amount' => floatval($this->pivot->amount),
             'name' => $this->name,
             'symbol' => $this->symbol,
         ];

@@ -2,9 +2,7 @@
 
 namespace App\Rules;
 
-use App\helpers\helper;
 use App\Repositories\Eloquent\UserRepository;
-use http\Header;
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Facades\Log;
 
@@ -36,15 +34,14 @@ class CoinConvertRangeRule implements Rule
     {
 
         $broker = $this->userRepository->getBrokerUser();
-        $brokerCoin = $this->userRepository->userCoinBalance($broker['id'], $this->coin);
-        $dollar = helper::getDollarPrice();
+        $brokerCoin = $this->userRepository->userCoinBalance($broker['id'], strtoupper($this->coin));
+
         if ($brokerCoin['pivot']['amount'] < $value) {
             $this->message = "input must be less than or equel " . $brokerCoin['pivot']['amount'];
             return false;
         }
-        $minCoin = 100000 / (floatval($brokerCoin['price']) * $dollar);
-        if ($minCoin > $value) {
-            $this->message = "input must be more than or equel " . $minCoin;
+        if ($brokerCoin['min_buy_price'] > $value) {
+            $this->message = "input must be more than or equel " . $brokerCoin['min_buy_price'];
             return false;
         }
         return true;

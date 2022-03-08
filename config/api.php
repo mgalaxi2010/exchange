@@ -11,4 +11,11 @@ return [
         'api_key' => env('USDT_NAVASAN_API_KEY', 'free2kBGVAyqEwG8K20JzAOdwexPgeUU'),
     ],
 
+    'min_coin_price'=>[
+        'IRR'=>500000,
+        'USDT'=>10,
+        'BTC'=>0.0001,
+        'ETH'=>0.002,
+        'SHIB'=>50000,
+    ]
 ];

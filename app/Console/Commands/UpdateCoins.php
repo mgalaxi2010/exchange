@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class UpdateCoins extends Command
 {
@@ -41,6 +42,7 @@ class UpdateCoins extends Command
      */
     public function handle()
     {
+        Log::info("update coin");
         $httpClient = new Client();
         $coin_api = config('api.coinGecko.market') . '?' . config('api.coinGecko.coins');
         $dollar_api = config('api.navasan.usdt') . '&api_key=' . config('api.navasan.api_key');
@@ -50,12 +52,13 @@ class UpdateCoins extends Command
         $dollar_response = json_decode($dollar->getBody()->getContents(), true);
         $dollarPrice = $dollar_response['usdt']['value'] * 10;
 
-        Coin::updateOrCreate(['name' => 'Rial', 'symbol' => 'IRR'], ['price' => 1 / $dollarPrice, 'created_at' => Carbon::now()]);
 
-        Coin::updateOrCreate(['name' => 'Usdt', 'symbol' => 'USDT'], ['price' => 1, 'created_at' => Carbon::now()]);
+        Coin::updateOrCreate(['name' => 'Rial', 'symbol' => 'IRR'], ['price' => 1 / $dollarPrice,'min_buy_price'=>config('api.min_coin_price.IRR'), 'created_at' => Carbon::now()]);
+
+        Coin::updateOrCreate(['name' => 'Usdt', 'symbol' => 'USDT'], ['price' => 1,'min_buy_price'=>config('api.min_coin_price.USDT'), 'created_at' => Carbon::now()]);
 
         foreach ($coins_response as $coin) {
-            Coin::updateOrCreate(['name' => $coin['name']], ['symbol' => strtoupper($coin['symbol']), 'price' => $coin['current_price'], 'created_at' => Carbon::now()]);
+            Coin::updateOrCreate(['name' => $coin['name']], ['symbol' => strtoupper($coin['symbol']), 'price' => $coin['current_price'],'min_buy_price'=>config('api.min_coin_price.'.strtoupper($coin['symbol'])), 'created_at' => Carbon::now()]);
         }
 
     }

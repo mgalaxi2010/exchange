@@ -20,8 +20,8 @@ class CreateTransactionTable extends Migration
             $table->tinyInteger('type')->unsigned();
             $table->integer('coin_id')->unsigned();
             $table->foreign('coin_id')->references('id')->on('coins')->onDelete('cascade');
-            $table->decimal('price',20,8)->unsigned();
-            $table->decimal('amount',20,8)->unsigned();
+            $table->decimal('price',38,18)->unsigned();
+            $table->decimal('amount',38,18)->unsigned();
             $table->timestamps();
         });
     }

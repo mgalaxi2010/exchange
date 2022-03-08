@@ -27,13 +27,12 @@ class RepositoryServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bind(EloquentRepositoryInterface::class, BaseRepository::class);
-        $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
-        $this->app->bind(WalletRepositoryInterface::class, WalletRepository::class);
-        $this->app->bind(CoinRepositoryInterface::class, CoinRepository::class);
-        $this->app->bind(CoinConvertRepositoryInterface::class, CoinConvertRepository::class);
-        $this->app->bind(AuthRepositoryInterface::class, AuthRepository::class);
-        $this->app->bind(TransactionRepositoryInterface::class, TransactionRepository::class);
+        $this->app->singleton(EloquentRepositoryInterface::class, BaseRepository::class);
+        $this->app->singleton(UserRepositoryInterface::class, UserRepository::class);
+        $this->app->singleton(WalletRepositoryInterface::class, WalletRepository::class);
+        $this->app->singleton(CoinRepositoryInterface::class, CoinRepository::class);
+        $this->app->singleton(AuthRepositoryInterface::class, AuthRepository::class);
+        $this->app->singleton(TransactionRepositoryInterface::class, TransactionRepository::class);
     }
 
     /**

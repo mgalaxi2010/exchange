@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Transaction extends Model
 {
-    protected $guarded = ['id'];
+    protected $guarded = [];
 
     const DEPOSIT = 1;
     const WITHDRAWAL = 2;
@@ -31,8 +31,4 @@ class Transaction extends Model
         ];
     }
 
-    public function getPriceAttribute($value)
-    {
-        return $value . ' USDT';
-    }
 }
