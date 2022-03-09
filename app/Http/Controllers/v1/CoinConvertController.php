@@ -20,9 +20,9 @@ class CoinConvertController extends Controller
         $this->coinConvertService = $coinConvertService;
     }
 
-    public function convertCoin(ConvertCoinRequest $request)
+    public function convertOrder(ConvertCoinRequest $request)
     {
-        $result = $this->coinConvertService->convertCoin($request);
+        $result = $this->coinConvertService->convertOrder($request);
         return response()->json($result);
     }
 }

@@ -37,11 +37,11 @@ class CoinConvertRangeRule implements Rule
         $brokerCoin = $this->userRepository->userCoinBalance($broker['id'], strtoupper($this->coin));
 
         if ($brokerCoin['pivot']['amount'] < $value) {
-            $this->message = "input must be less than or equel " . $brokerCoin['pivot']['amount'];
+            $this->message = "input must be less than or equel " . floatval($brokerCoin['pivot']['amount']);
             return false;
         }
         if ($brokerCoin['min_buy_price'] > $value) {
-            $this->message = "input must be more than or equel " . $brokerCoin['min_buy_price'];
+            $this->message = "input must be more than or equel " . floatval($brokerCoin['min_buy_price']);
             return false;
         }
         return true;
