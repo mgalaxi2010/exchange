@@ -39,8 +39,10 @@ class CoinConvertService
 
             $brokerConvertToBalance = $brokerConvertToCoinBalance ? $brokerConvertToCoinBalance['pivot']['amount'] : 0;
             $userConvertFromBalance = $userConvertFromCoinBalance ? $userConvertFromCoinBalance['pivot']['amount'] : 0;
-            $userTotalRequestedAmount = bcmul($userConvertFromCoinBalance['pivot']['amount'] * $userConvertFromCoinBalance['price'],10);
-            $brokerTotalRequestedAmount = bcmul($brokerConvertToCoinBalance['price']*$request['amount_to'],10);
+
+
+            $userTotalRequestedAmount = $userConvertFromCoinBalance ? bcmul($userConvertFromCoinBalance['pivot']['amount'] * $userConvertFromCoinBalance['price'], 10) : 0;
+            $brokerTotalRequestedAmount = $brokerConvertToCoinBalance ? bcmul($brokerConvertToCoinBalance['price'] * $request['amount_to'], 10) : 0;
 
             // check if broker has enough requested coin and user has enough requested amount
             if ($brokerConvertToBalance >= $request['amount_to'] && $brokerTotalRequestedAmount == $userTotalRequestedAmount && $userConvertFromBalance >= $request['amount_from']) {
@@ -54,7 +56,7 @@ class CoinConvertService
                     'price' => $userConvertFromCoinBalance['price'],
                     'amount' => $request['amount_from'],
                 ];
-                $transaction1 = $this->transactionRepository->create($transactionData1);
+                $this->transactionRepository->create($transactionData1);
 
                 $data1 = [
                     'user_id' => $userConvertFromCoinBalance['pivot']['user_id'],
@@ -64,7 +66,7 @@ class CoinConvertService
                     'last_balance' => $userConvertFromCoinBalance['pivot']['amount'],
                     'isNew' => (bool)$userConvertFromCoinBalance
                 ];
-                $walletUpdate1 = $this->userRepository->updateUserWallet($data1);
+                $this->userRepository->updateUserWallet($data1);
 
                 // deposit broker convert from coin
                 $transactionData2 = [
@@ -74,7 +76,7 @@ class CoinConvertService
                     'price' => $userConvertFromCoinBalance['price'],
                     'amount' => $request['amount_from'],
                 ];
-                $transaction2 = $this->transactionRepository->create($transactionData2);
+                $this->transactionRepository->create($transactionData2);
 
                 $data2 = [
                     'user_id' => $brokerUser['id'],
@@ -84,7 +86,7 @@ class CoinConvertService
                     'last_balance' => isset($brokerConvertFromCoinBalance) ? $brokerConvertFromCoinBalance['pivot']['amount'] : 0,
                     'isNew' => (bool)$brokerConvertFromCoinBalance
                 ];
-                $walletUpdate2 = $this->userRepository->updateUserWallet($data2);
+                $this->userRepository->updateUserWallet($data2);
 
                 // withdraw broker convert to coin
                 $transactionData3 = [
@@ -94,7 +96,7 @@ class CoinConvertService
                     'price' => $brokerConvertToCoinBalance['price'],
                     'amount' => $request['amount_to'],
                 ];
-                $transaction3 = $this->transactionRepository->create($transactionData3);
+                $this->transactionRepository->create($transactionData3);
 
                 $data3 = [
                     'user_id' => $brokerUser['id'],
@@ -104,7 +106,7 @@ class CoinConvertService
                     'last_balance' => $brokerConvertToCoinBalance ? $brokerConvertToCoinBalance['pivot']['amount'] : 0,
                     'isNew' => (bool)$brokerConvertToCoinBalance
                 ];
-                $walletUpdate3 = $this->userRepository->updateUserWallet($data3);
+                $this->userRepository->updateUserWallet($data3);
 
                 /// deposit user convert to coin
                 $transactionData4 = [
@@ -115,7 +117,7 @@ class CoinConvertService
                     'amount' => $request['amount_to'],
                 ];
 
-                $transaction4 = $this->transactionRepository->create($transactionData4);
+                $this->transactionRepository->create($transactionData4);
                 $data4 = [
                     'user_id' => $userConvertFromCoinBalance['pivot']['user_id'],
                     'coin_id' => $brokerConvertToCoinBalance['pivot']['coin_id'],
@@ -124,7 +126,7 @@ class CoinConvertService
                     'last_balance' => isset($userConvertToCoinBalance) ? $userConvertToCoinBalance['pivot']['amount'] : 0,
                     'isNew' => (bool)$userConvertToCoinBalance
                 ];
-                $walletUpdate4 = $this->userRepository->updateUserWallet($data4);
+                $this->userRepository->updateUserWallet($data4);
 
                 $message = "coin converted successfully";
             } else {
@@ -148,4 +150,8 @@ class CoinConvertService
         return $this->userRepository->userCoinBalance($userId, $coin);
     }
 
+    public function orders()
+    {
+        return $this->userRepository->orders();
+    }
 }

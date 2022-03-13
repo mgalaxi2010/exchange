@@ -4,23 +4,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Transaction extends Model
+class Order extends Model
 {
+    protected $table = "orders";
     protected $guarded = [];
+    public $timestamps = true;
 
     const DEPOSIT = 1;
-    const WITHDRAWAL = 2;
-
-    public $timestamps = true;
+    const CHANGE = 2;
 
     public function user()
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function order()
-    {
-        return $this->belongsTo(Order::class);
     }
 
     public function getTypeAttribute($value)
@@ -31,9 +26,8 @@ class Transaction extends Model
     public static function getType()
     {
         return [
-            self::DEPOSIT => 'Deposit,',
-            self::WITHDRAWAL => 'Withdrawal,'
+            self::DEPOSIT => 'Deposit',
+            self::CHANGE => 'CHANGE'
         ];
     }
-
 }

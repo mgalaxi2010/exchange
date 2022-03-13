@@ -42,7 +42,6 @@ class UpdateCoins extends Command
      */
     public function handle()
     {
-        Log::info("update coin");
         $httpClient = new Client();
         $coin_api = config('api.coinGecko.market') . '?' . config('api.coinGecko.coins');
         $dollar_api = config('api.navasan.usdt') . '&api_key=' . config('api.navasan.api_key');

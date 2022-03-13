@@ -4,7 +4,6 @@ namespace App\Rules;
 
 use App\Repositories\Eloquent\UserRepository;
 use Illuminate\Contracts\Validation\Rule;
-use Illuminate\Support\Facades\Log;
 
 class CoinConvertRangeRule implements Rule
 {
@@ -34,8 +33,7 @@ class CoinConvertRangeRule implements Rule
     {
 
         $broker = $this->userRepository->getBrokerUser();
-        $brokerCoin = $this->userRepository->userCoinBalance($broker['id'], strtoupper($this->coin));
-
+        $brokerCoin = $this->userRepository->userCoinBalance($broker['id'], $this->coin);
         if ($brokerCoin['pivot']['amount'] < $value) {
             $this->message = "input must be less than or equel " . floatval($brokerCoin['pivot']['amount']);
             return false;

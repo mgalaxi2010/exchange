@@ -13,4 +13,6 @@ interface UserRepositoryInterface
     public function updateUserWallet(array $data);
 
     public function getBrokerUser();
+
+    public function orders();
 }

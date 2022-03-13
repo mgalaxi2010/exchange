@@ -40,7 +40,7 @@ class BrokerUserSeeder extends Seeder
         DB::table('users_coins')->insert([
             'user_id'=>1,
             'coin_id'=>5,
-            'amount'=> 2500000000
+            'amount'=> 1000000000
         ]);
 
     }
